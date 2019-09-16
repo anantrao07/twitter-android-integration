@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">tweety</string>
+    <string name="hello_blank_fragment">hello_blank_fragment</string>
+    <string name="title_activity_maps" >Map</string>
+</resources>
