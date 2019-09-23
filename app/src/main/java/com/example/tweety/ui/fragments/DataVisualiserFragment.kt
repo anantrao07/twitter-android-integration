@@ -18,7 +18,7 @@ import com.android.volley.toolbox.JsonObjectRequest
 import com.example.tweety.*
 import com.example.tweety.networking.VolleyInstance
 import com.example.tweety.networking.generateSignature
-import com.example.tweety.networking.generatesignatureBaseStr
+import com.example.tweety.networking.generateSignatureBaseStr
 import com.example.tweety.networking.getBase64
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -62,7 +62,7 @@ class DataVisualiserFragment : Fragment(), OnMapReadyCallback {
 
     override fun onResume() {
         super.onResume()
-        getTweets()
+       // getTweets()
     }
 
     override fun onRequestPermissionsResult(
@@ -108,8 +108,9 @@ class DataVisualiserFragment : Fragment(), OnMapReadyCallback {
             lastLocation.latitude = it.latitude
             lastLocation.longitude = it.longitude
         }
-        val parameterString = "q=from:${userName}&geocode=${location.latitude} ${location.longitude} 5 km&count=2"
+        val parameterString = "q=geocode=-22.912214,-43.230182,1km&lang=pt&result_type=recent"//&geocode=${location.latitude} ${location.longitude} 5 km&count=2"
         val url = SEARCH_TWEETS_WITH_GEO_TAGS + parameterString
+
 
         val jsonObjectRequest = object : JsonObjectRequest(
             Method.GET, url, null,
@@ -121,30 +122,29 @@ class DataVisualiserFragment : Fragment(), OnMapReadyCallback {
             }
         ) {
             override fun getHeaders(): MutableMap<String, String> {
-                return getHeaderHashMap( parameterString)
+                return getHeaderHashMap()
             }
         }
-
         queue.addToRequestQueue(jsonObjectRequest)
     }
 
-    private fun getHeaderHashMap( parameterString: String): MutableMap<String, String> {
+    private fun getHeaderHashMap(): MutableMap<String, String> {
         val headers = HashMap<String, String>()
-        headers["authorization"] = "OAuth"
         headers["oauth_consumer_key"] = consumerApiKey
         headers["oauth_nonce"] = getBase64(LocalDateTime.now().toString())
-        headers["oauth_signature"] = generateSignature(
-            generatesignatureBaseStr(
-                REQUEST_METHOD_GET,
-                BASE_URL,
-                parameterString
-            ),
-            consumerSecretKey, authToken
-        )
         headers["oauth_signature_method"] = "HMAC-SHA1"
         headers["oauth_timestamp"] = System.currentTimeMillis().toString()
-        headers["oauth_token"] = authToken
+        headers["oauth_token"] = "token"
         headers["oauth_version"] = "1.0"
+        headers["oauth_signature"] = generateSignature(
+            generateSignatureBaseStr(
+                REQUEST_METHOD_GET,
+                SEARCH_TWEETS_WITH_GEO_TAGS,
+                headers
+            ),
+            consumerSecretKey, "tokenSecret"
+        )
+
         return headers
     }
 

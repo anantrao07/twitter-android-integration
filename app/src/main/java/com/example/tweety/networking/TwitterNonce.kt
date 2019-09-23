@@ -11,7 +11,7 @@ fun getBase64(input: String): String {
     return Base64.encodeToString(input.toByteArray(), Base64.NO_WRAP)
 }
 
- fun encode(value: String): String {
+fun encode(value: String): String {
     var encoded = ""
     try {
         encoded = URLEncoder.encode(value, "UTF-8")
@@ -41,7 +41,7 @@ fun getBase64(input: String): String {
     return sb
 }
 
- fun generateSignature(
+fun generateSignature(
     signatureBaseStr: String,
     oAuthConsumerSecret: String,
     oAuthTokenSecret: String?
@@ -50,7 +50,7 @@ fun getBase64(input: String): String {
     try {
         val mac = Mac.getInstance("HmacSHA1")
         val spec: SecretKeySpec
-        spec = if (null == oAuthTokenSecret) {
+        spec = if (oAuthTokenSecret == null) {
             val signingKey = encode(oAuthConsumerSecret) + '&'
             SecretKeySpec(signingKey.toByteArray(), "HmacSHA1")
         } else {
@@ -63,12 +63,19 @@ fun getBase64(input: String): String {
         e.printStackTrace()
     }
 
-    return String(java.util.Base64.getMimeEncoder().encode(byteHMAC!!),  StandardCharsets.UTF_8)
+    return String(java.util.Base64.getMimeEncoder().encode(byteHMAC!!), StandardCharsets.UTF_8)
 }
 
-fun generatesignatureBaseStr(requestMethod: String, baseURL: String, parameterString: String): String {
-    var outputString = requestMethod.capitalize()+"&"
-    outputString = outputString+encode(baseURL)+"&"
-    outputString += encode(parameterString)
+fun generateSignatureBaseStr(
+    requestMethod: String,
+    baseURL: String,
+    headers: HashMap<String, String>
+): String {
+    var outputString = encode(requestMethod.capitalize() + "&")
+    outputString += encode("$baseURL&")
+    val sortedHeaders = headers.toSortedMap()
+    sortedHeaders.forEach { (key, value) ->
+        outputString += encode("$key=$value&")
+    }
     return outputString
 }
